@@ -14,5 +14,8 @@
     "url": "https://github.com/GelamiSalami/Toymi.js.git"
   },
   "author": "GelamiSalami",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4"
+  }
 }
