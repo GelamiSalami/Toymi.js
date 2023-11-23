@@ -3,7 +3,8 @@
   "version": "1.0.1",
   "description": "Minimal WebGL2 thin library for prototyping 3D graphics",
   "type": "module",
-  "main": "src/Toymi.js",
+  "main": "build/toymi.js",
+  "module": "build/toymi.module.js",
   "directories": {
     "example": "examples"
   },
