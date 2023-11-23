@@ -1,7 +1,18 @@
 
 import terser from '@rollup/plugin-terser';
 
-export default {
+const builds = [
+{
+	input: "src/Toymi.js",
+	output: {
+		file: "build/toymi.module.min.js",
+		format: "esm"
+	},
+	plugins: [
+		terser()
+	]
+},
+{
 	input: "src/Toymi.js",
 	output: {
 		file: "build/toymi.min.js",
@@ -10,4 +21,6 @@ export default {
 	plugins: [
 		terser()
 	]
-};
+}];
+
+export default builds;
