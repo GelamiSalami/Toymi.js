@@ -1,0 +1,18 @@
+{
+  "name": "toymi.js",
+  "version": "1.0.0",
+  "description": "Minimal WebGL2 thin library for prototyping 3D graphics",
+  "main": "src/Toymi.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GelamiSalami/Toymi.js.git"
+  },
+  "author": "GelamiSalami",
+  "license": "MIT"
+}
