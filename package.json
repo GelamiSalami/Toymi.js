@@ -1,6 +1,6 @@
 {
   "name": "toymi.js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Minimal WebGL2 thin library for prototyping 3D graphics",
   "type": "module",
   "main": "build/toymi.js",
@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/GelamiSalami/Toymi.js",
   "devDependencies": {
-    "@rollup/plugin-terser": "^0.4.4"
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.5.2"
   }
 }
