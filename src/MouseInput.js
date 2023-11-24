@@ -37,6 +37,8 @@ export class MouseInput {
 		let y = event.clientY != null ? event.clientY : event.touches[0].clientY;
 		let rect = this.domElement.getBoundingClientRect();
 
+		this.prevX = this.x;
+		this.prevY = this.y;
 		this.x = x - rect.left;
 		this.y = y - rect.top;
 	}
