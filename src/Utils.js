@@ -11,6 +11,14 @@ export function resizeCanvasToDisplaySize(canvas, pixelRatio) {
 	return false;
 }
 
-const Utils = { resizeCanvasToDisplaySize };
+export function disableContextMenu(element) {
+	element.addEventListener("contextmenu", (event) => {
+		if (event.button == 2) {
+			event.preventDefault();
+		}
+	});
+}
+
+const Utils = { resizeCanvasToDisplaySize, disableContextMenu };
 
 export { Utils };
