@@ -8,6 +8,8 @@ import { MouseInput } from "./MouseInput.js";
 import { KeyInput } from "./KeyInput.js";
 
 import { Utils } from "./Utils.js";
+import { MathUtils } from "./MathUtils.js";
+import { RandomUtils } from "./RandomUtils.js";
 
 export { ShaderProgram,
 		 Framebuffer,
@@ -15,5 +17,6 @@ export { ShaderProgram,
 		 Renderbuffer,
 		 MouseInput,
 		 KeyInput,
-		 Utils
+		 Utils,
+		 MathUtils
 };
