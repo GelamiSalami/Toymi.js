@@ -112,31 +112,6 @@ class ShaderProgram {
 	}
 }
 
-class Framebuffer {
-
-	constructor(gl, width, height, ...attachments) {
-		this.gl = gl;
-		this.width = width;
-		this.height = height;
-		this.glFramebuffer = gl.createFramebuffer();
-
-		gl.bindFramebuffer(gl.FRAMEBUFFER, this.glFramebuffer);
-
-		for (const attachment of attachments) {
-			if (attachment instanceof WebGLRenderbuffer) {
-				gl.framebufferRenderbuffer(gl.FRAMEBUFFER, attachment.type, gl.RENDERBUFFER, attachment.texture);
-			} else {
-				gl.framebufferTexture2D(gl.FRAMEBUFFER, attachment.type, gl.TEXTURE_2D, attachment.texture, attachment.level || 0);
-			}
-		}
-	}
-
-	bind() {
-		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.glFramebuffer);
-		this.gl.viewport(0, 0, this.width, this.height);
-	}
-}
-
 class Texture {
 
 	constructor(gl, {
@@ -165,8 +140,8 @@ class Texture {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapMode);
 	}
 
-	bind(index) {
-		this.gl.activeTexture(this.gl.TEXTURE0 + index || 0);
+	bind(index = 0) {
+		this.gl.activeTexture(this.gl.TEXTURE0 + index);
 		this.gl.bindTexture(this.gl.TEXTURE_2D, this.glTexture);
 	}
 }
@@ -187,6 +162,129 @@ class Renderbuffer {
 
 	bind() {
 		this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, this.glRenderbuffer);
+	}
+}
+
+class Framebuffer {
+
+	constructor(gl, width, height, ...attachments) {
+		this.gl = gl;
+		this.width = width;
+		this.height = height;
+		this.glFramebuffer = gl.createFramebuffer();
+
+		gl.bindFramebuffer(gl.FRAMEBUFFER, this.glFramebuffer);
+
+		for (const attachment of attachments) {
+			if (attachment.texture instanceof WebGLRenderbuffer) {
+				gl.framebufferRenderbuffer(gl.FRAMEBUFFER, attachment.type, gl.RENDERBUFFER, attachment.texture);
+			} else {
+				gl.framebufferTexture2D(gl.FRAMEBUFFER, attachment.type, gl.TEXTURE_2D, attachment.texture, attachment.level || 0);
+			}
+		}
+	}
+
+	bind() {
+		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.glFramebuffer);
+		this.gl.viewport(0, 0, this.width, this.height);
+	}
+}
+
+class Mesh {
+
+	constructor(gl) {
+		this.gl = gl;
+
+		this.vao = gl.createVertexArray();
+		this.mode = gl.TRIANGLES;
+		this.count = 0;
+
+		this.attributes = {};
+	}
+
+	setAttribute(name, { data, dataType, count, byteCount, usage = this.gl.STATIC_DRAW }) {
+		const buffer = this.gl.createBuffer();
+
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
+		this.gl.bufferData(this.gl.ARRAY_BUFFER, data, usage);
+
+		this.attributes[name] = {
+			data: data,
+			dataType: dataType,
+			count: count,
+			buffer: buffer
+		};
+	}
+
+	bindAttributes(program) {
+
+		this.bind();
+
+		for (const name in this.attributes) {
+			const attribute = this.attributes[name];
+
+			const attributeLoc = this.gl.getAttribLocation(program.glProgram, name);
+
+			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, attribute.buffer);
+			this.gl.vertexAttribPointer(attributeLoc, attribute.count, attribute.dataType, false, 0, 0);
+			this.gl.enableVertexAttribArray(attributeLoc);
+		}
+	}
+
+	bind() {
+		this.gl.bindVertexArray(this.vao);
+	}
+
+	setDrawMode(mode, count) {
+		this.mode = mode;
+		this.count = count;
+	}
+
+	draw() {
+		this.bind();
+		this.gl.drawArrays(this.mode, 0, this.count);
+	}
+
+	static createQuadMesh(gl, program) {
+
+		const mesh = new Mesh(gl);
+
+		mesh.setDrawMode(gl.TRIANGLE_FAN, 4);
+
+		mesh.setAttribute("aPosition", {
+			data: new Float32Array([-1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0]),
+			dataType: gl.FLOAT,
+			count: 2
+		});
+		mesh.setAttribute("aUv", {
+			data: new Float32Array([0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0]),
+			dataType: gl.FLOAT,
+			count: 2
+		});
+		mesh.bindAttributes(program);
+
+		return mesh;
+	}
+
+	static createFullscreenMesh(gl, program) {
+
+		const mesh = new Mesh(gl);
+
+		mesh.setDrawMode(gl.TRIANGLES, 3);
+
+		mesh.setAttribute("aPosition", {
+			data: new Float32Array([-1.0, -1.0, -1.0, 3.0, 3.0, -1.0]),
+			dataType: gl.FLOAT,
+			count: 2
+		});
+		mesh.setAttribute("aUv", {
+			data: new Float32Array([0.0, 0.0, 0.0, 2.0, 2.0, 0.0]),
+			dataType: gl.FLOAT,
+			count: 2
+		});
+		mesh.bindAttributes(program);
+
+		return mesh;
 	}
 }
 
@@ -334,6 +432,176 @@ class KeyInput {
 	}
 }
 
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
+var Stats = function () {
+
+	var mode = 0;
+
+	var container = document.createElement( 'div' );
+	container.style.cssText = 'position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000';
+	container.addEventListener( 'click', function ( event ) {
+
+		event.preventDefault();
+		showPanel( ++ mode % container.children.length );
+
+	}, false );
+
+	//
+
+	function addPanel( panel ) {
+
+		container.appendChild( panel.dom );
+		return panel;
+
+	}
+
+	function showPanel( id ) {
+
+		for ( var i = 0; i < container.children.length; i ++ ) {
+
+			container.children[ i ].style.display = i === id ? 'block' : 'none';
+
+		}
+
+		mode = id;
+
+	}
+
+	//
+
+	var beginTime = ( performance || Date ).now(), prevTime = beginTime, frames = 0;
+
+	var fpsPanel = addPanel( new Stats.Panel( 'FPS', '#0ff', '#002' ) );
+	var msPanel = addPanel( new Stats.Panel( 'MS', '#0f0', '#020' ) );
+
+	if ( self.performance && self.performance.memory ) {
+
+		var memPanel = addPanel( new Stats.Panel( 'MB', '#f08', '#201' ) );
+
+	}
+
+	showPanel( 0 );
+
+	return {
+
+		REVISION: 16,
+
+		dom: container,
+
+		addPanel: addPanel,
+		showPanel: showPanel,
+
+		begin: function () {
+
+			beginTime = ( performance || Date ).now();
+
+		},
+
+		end: function () {
+
+			frames ++;
+
+			var time = ( performance || Date ).now();
+
+			msPanel.update( time - beginTime, 200 );
+
+			if ( time >= prevTime + 1000 ) {
+
+				fpsPanel.update( ( frames * 1000 ) / ( time - prevTime ), 100 );
+
+				prevTime = time;
+				frames = 0;
+
+				if ( memPanel ) {
+
+					var memory = performance.memory;
+					memPanel.update( memory.usedJSHeapSize / 1048576, memory.jsHeapSizeLimit / 1048576 );
+
+				}
+
+			}
+
+			return time;
+
+		},
+
+		update: function () {
+
+			beginTime = this.end();
+
+		},
+
+		// Backwards Compatibility
+
+		domElement: container,
+		setMode: showPanel
+
+	};
+
+};
+
+Stats.Panel = function ( name, fg, bg ) {
+
+	var min = Infinity, max = 0, round = Math.round;
+	var PR = round( window.devicePixelRatio || 1 );
+
+	var WIDTH = 80 * PR, HEIGHT = 48 * PR,
+			TEXT_X = 3 * PR, TEXT_Y = 2 * PR,
+			GRAPH_X = 3 * PR, GRAPH_Y = 15 * PR,
+			GRAPH_WIDTH = 74 * PR, GRAPH_HEIGHT = 30 * PR;
+
+	var canvas = document.createElement( 'canvas' );
+	canvas.width = WIDTH;
+	canvas.height = HEIGHT;
+	canvas.style.cssText = 'width:80px;height:48px';
+
+	var context = canvas.getContext( '2d' );
+	context.font = 'bold ' + ( 9 * PR ) + 'px Helvetica,Arial,sans-serif';
+	context.textBaseline = 'top';
+
+	context.fillStyle = bg;
+	context.fillRect( 0, 0, WIDTH, HEIGHT );
+
+	context.fillStyle = fg;
+	context.fillText( name, TEXT_X, TEXT_Y );
+	context.fillRect( GRAPH_X, GRAPH_Y, GRAPH_WIDTH, GRAPH_HEIGHT );
+
+	context.fillStyle = bg;
+	context.globalAlpha = 0.9;
+	context.fillRect( GRAPH_X, GRAPH_Y, GRAPH_WIDTH, GRAPH_HEIGHT );
+
+	return {
+
+		dom: canvas,
+
+		update: function ( value, maxValue ) {
+
+			min = Math.min( min, value );
+			max = Math.max( max, value );
+
+			context.fillStyle = bg;
+			context.globalAlpha = 1;
+			context.fillRect( 0, 0, WIDTH, GRAPH_Y );
+			context.fillStyle = fg;
+			context.fillText( round( value ) + ' ' + name + ' (' + round( min ) + '-' + round( max ) + ')', TEXT_X, TEXT_Y );
+
+			context.drawImage( canvas, GRAPH_X + PR, GRAPH_Y, GRAPH_WIDTH - PR, GRAPH_HEIGHT, GRAPH_X, GRAPH_Y, GRAPH_WIDTH - PR, GRAPH_HEIGHT );
+
+			context.fillRect( GRAPH_X + GRAPH_WIDTH - PR, GRAPH_Y, PR, GRAPH_HEIGHT );
+
+			context.fillStyle = bg;
+			context.globalAlpha = 0.9;
+			context.fillRect( GRAPH_X + GRAPH_WIDTH - PR, GRAPH_Y, PR, round( ( 1 - ( value / maxValue ) ) * GRAPH_HEIGHT ) );
+
+		}
+
+	};
+
+};
+
 function resizeCanvasToDisplaySize(canvas, pixelRatio) {
 	pixelRatio = pixelRatio || 1;
 	const width  = canvas.clientWidth * pixelRatio | 0;
@@ -354,7 +622,21 @@ function disableContextMenu(element) {
 	});
 }
 
-const Utils = { resizeCanvasToDisplaySize, disableContextMenu };
+function addStatsJS(type = 0, domElement = document.body) {
+	const stats = new Stats();
+
+	stats.showPanel(type); // 0: fps, 1: ms, 2: mb, 3+: custom
+	domElement.appendChild(stats.dom);
+
+	function update() {
+		stats.update();
+
+		requestAnimationFrame(update);
+	}
+	requestAnimationFrame(update);
+}
+
+const Utils = { resizeCanvasToDisplaySize, disableContextMenu, addStatsJS };
 
 function pitchYawToDirection(pitch, yaw) {
 	return [Math.cos(yaw) * Math.cos(pitch), Math.sin(pitch), Math.sin(yaw) * Math.cos(pitch)];
@@ -1917,9 +2199,116 @@ class OrbitControls {
 	}
 }
 
+class FPSControls {
+
+	constructor(mouseInput, keyInput, domElement) {
+		this.mouseInput = mouseInput;
+		this.keyInput = keyInput;
+		this.domElement = domElement;
+
+		this.pitch = 0;
+		this.yaw = 0;
+		this.pitchVelocity = 0;
+		this.yawVelocity = 0;
+
+		this.damping = 0.0;
+
+		this.direction = [0, 0, 1];
+		this.directionRight = [-1, 0, 0];
+		this.origin = [0, 0, 0];
+		this.position = [0, 0, 0];
+
+		this.lookSensitivity = 1;
+
+		this.speed = 1;
+		this.speedupScale = 2;
+
+		this._addEventListeners();
+	}
+
+	update() {
+
+		let forwardSpeed = this.speed;
+		let verticalSpeed = this.speed;
+		let sideSpeed = this.speed;
+
+		if (this.keyInput.shift) {
+			forwardSpeed *= this.speedupScale;
+			verticalSpeed *= this.speedupScale;
+			sideSpeed *= this.speedupScale;
+		}
+
+		if (this.keyInput.space) {
+			this.position[1] += verticalSpeed;
+		}
+
+		if (this.keyInput.c) {
+			this.position[1] -= verticalSpeed;
+		}
+
+		if (this.keyInput.up || this.keyInput.down) {
+			if (this.keyInput.down) {
+				forwardSpeed = -forwardSpeed;
+			}
+			m4.addVectors(this.position, m4.scaleVector(this.direction, forwardSpeed), this.position);
+		}
+
+		if (this.keyInput.left || this.keyInput.right) {
+			if (this.keyInput.left) {
+				sideSpeed = -sideSpeed;
+			}
+			m4.addVectors(this.position, m4.scaleVector(this.directionRight, sideSpeed), this.position);
+		}
+
+		if (Math.abs(this.pitchVelocity) > 1e-4) {
+			this.pitch += this.pitchVelocity;
+			this.pitch = clamp(this.pitch, -Math.PI * 0.5 + 1e-4, Math.PI * 0.5 - 1e-4);
+			this.pitchVelocity *= this.damping;
+		}
+
+		if (Math.abs(this.yawVelocity) > 1e-4) {
+			this.yaw += this.yawVelocity;
+			this.yaw = mod(this.yaw, Math.PI * 2.0);
+
+			this.yawVelocity *= this.damping;
+		}
+
+		if (Math.abs(this.radiusVelocity) > 1e-4) {
+			this.radius += this.radiusVelocity;
+
+			this.radiusVelocity *= this.radiusDamping;
+		}
+
+		this.direction = pitchYawToDirection(this.pitch, this.yaw);
+		this.directionRight = m4.normalize(m4.cross(this.direction, [0, 1, 0]));
+
+		m4.addVectors(this.position, this.direction, this.origin);
+	}
+
+	_addEventListeners() {
+		this.domElement.addEventListener("mousemove", this._mouseMoved.bind(this));
+		this.domElement.addEventListener("touchmove", this._mouseMoved.bind(this), { passive: true });
+	}
+
+	_mouseMoved(event) {
+		if (this.mouseInput.x != this.mouseInput.prevX || this.mouseInput.y != this.mouseInput.prevY) {
+			if (this.mouseInput.buttonLeft) {
+				let deltaX = this.lookSensitivity * (this.mouseInput.x - this.mouseInput.prevX) / this.domElement.clientWidth;
+				let deltaY = this.lookSensitivity * (this.mouseInput.y - this.mouseInput.prevY) / this.domElement.clientHeight;
+
+				this.pitchVelocity -= deltaY * Math.PI;
+				this.yawVelocity += deltaX * Math.PI * 2.0;
+			}
+		}
+	}
+
+}
+
+exports.FPSControls = FPSControls;
 exports.Framebuffer = Framebuffer;
 exports.KeyInput = KeyInput;
 exports.MathUtils = MathUtils;
+exports.Mesh = Mesh;
 exports.MouseInput = MouseInput;
 exports.OrbitControls = OrbitControls;
 exports.Renderbuffer = Renderbuffer;
