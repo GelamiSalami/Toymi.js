@@ -3,7 +3,7 @@ Minimal WebGL2 thin library for prototyping 3D graphics
 
 ### Usage
 
-[Basic Example](https://github.com/GelamiSalami/Toymi.js/examples/basic_example.html)
+[Basic Example](https://gelamisalami.github.io/Toymi.js/examples/basic_example.html)
 
 ```javascript
 import { ExampleShader } from "./shaders/ShaderSources.js";
