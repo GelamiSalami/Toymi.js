@@ -1,4 +1,6 @@
 
+import Stats from "../libs/stats.module.js";
+
 export function resizeCanvasToDisplaySize(canvas, pixelRatio) {
 	pixelRatio = pixelRatio || 1;
 	const width  = canvas.clientWidth * pixelRatio | 0;
@@ -19,6 +21,20 @@ export function disableContextMenu(element) {
 	});
 }
 
-const Utils = { resizeCanvasToDisplaySize, disableContextMenu };
+export function addStatsJS(type = 0, domElement = document.body) {
+	const stats = new Stats();
+
+	stats.showPanel(type); // 0: fps, 1: ms, 2: mb, 3+: custom
+	domElement.appendChild(stats.dom);
+
+	function update() {
+		stats.update();
+
+		requestAnimationFrame(update);
+	}
+	requestAnimationFrame(update);
+}
+
+const Utils = { resizeCanvasToDisplaySize, disableContextMenu, addStatsJS };
 
 export { Utils };
