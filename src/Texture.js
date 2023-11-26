@@ -27,8 +27,8 @@ export class Texture {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapMode);
 	}
 
-	bind(index) {
-		this.gl.activeTexture(this.gl.TEXTURE0 + index || 0);
+	bind(index = 0) {
+		this.gl.activeTexture(this.gl.TEXTURE0 + index);
 		this.gl.bindTexture(this.gl.TEXTURE_2D, this.glTexture);
 	}
 }
