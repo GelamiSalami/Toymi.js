@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Toymi.js Template</title>
+
+	<meta property="og:title" content="Title" />
+	<meta property="og:description" content="This is a description." />
+	<meta property="og:url" content="" />
+	<meta property="og:image" content="" />
+	<meta name="theme-color" content="#C11D25" />
+	<meta name="twitter:card" content="summary_large_image">
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+	<div id="hero">
+		<div id="canvas-container">
+			<canvas id="main-canvas"></canvas>
+			<script type="module" defer>
+				import { ExampleShader } from "./shaders/ShaderSources.js";
+				import { ShaderProgram, Mesh, Utils } from "../build/toymi.module.min.js";
+
+				const canvas = document.getElementById("main-canvas");
+				const gl = canvas.getContext("webgl2", { antialias: false });
+
+				const program = new ShaderProgram(gl, ExampleShader.vertex, ExampleShader.fragment);
+				const mesh = Mesh.createFullscreenMesh(gl, program);
+
+				function render(currentTime) {
+					if (Utils.resizeCanvasToDisplaySize(gl.canvas)) {
+					}
+
+					gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+					program.use();
+
+					program.setUniform("uTime", currentTime / 1000);
+
+					mesh.draw();
+
+					requestAnimationFrame(render);
+				}
+				requestAnimationFrame(render);
+			</script>
+		</div>
+	</div>
+</body>
