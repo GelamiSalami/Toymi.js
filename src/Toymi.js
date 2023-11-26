@@ -4,6 +4,8 @@ import { Framebuffer } from "./Framebuffer.js";
 import { Texture } from "./Texture.js";
 import { Renderbuffer } from "./Renderbuffer.js";
 
+import { Mesh } from "./Mesh.js";
+
 import { MouseInput } from "./MouseInput.js";
 import { KeyInput } from "./KeyInput.js";
 
@@ -18,6 +20,7 @@ export { ShaderProgram,
 		 Framebuffer,
 		 Texture,
 		 Renderbuffer,
+		 Mesh,
 		 MouseInput,
 		 KeyInput,
 		 Utils,
