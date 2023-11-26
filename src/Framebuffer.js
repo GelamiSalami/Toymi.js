@@ -1,4 +1,7 @@
 
+import { Texture } from "./Texture.js";
+import { Renderbuffer } from "./Renderbuffer.js";
+
 export class Framebuffer {
 
 	constructor(gl, width, height, ...attachments) {
@@ -10,7 +13,7 @@ export class Framebuffer {
 		gl.bindFramebuffer(gl.FRAMEBUFFER, this.glFramebuffer);
 
 		for (const attachment of attachments) {
-			if (attachment instanceof WebGLRenderbuffer) {
+			if (attachment.texture instanceof WebGLRenderbuffer) {
 				gl.framebufferRenderbuffer(gl.FRAMEBUFFER, attachment.type, gl.RENDERBUFFER, attachment.texture);
 			} else {
 				gl.framebufferTexture2D(gl.FRAMEBUFFER, attachment.type, gl.TEXTURE_2D, attachment.texture, attachment.level || 0);
