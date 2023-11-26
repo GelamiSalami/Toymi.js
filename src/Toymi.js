@@ -12,6 +12,7 @@ import { MathUtils } from "./MathUtils.js";
 import { RandomUtils } from "./RandomUtils.js";
 
 import { OrbitControls } from "./OrbitControls.js";
+import { FPSControls } from "./FPSControls.js";
 
 export { ShaderProgram,
 		 Framebuffer,
@@ -21,5 +22,6 @@ export { ShaderProgram,
 		 KeyInput,
 		 Utils,
 		 MathUtils,
-		 OrbitControls
+		 OrbitControls,
+		 FPSControls
 };
