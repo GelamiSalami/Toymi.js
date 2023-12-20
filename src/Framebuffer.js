@@ -25,4 +25,9 @@ export class Framebuffer {
 		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.glFramebuffer);
 		this.gl.viewport(0, 0, this.width, this.height);
 	}
+
+	resize(width, height) {
+		this.width = width;
+		this.height = height;
+	}
 }
